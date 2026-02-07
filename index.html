@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nerimity Reports</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #0f1117;
+      --panel: #161a23;
+      --panel-soft: #1c2230;
+      --accent: #5865f2;
+      --accent-hover: #6f7bf7;
+      --text: #e6e9f4;
+      --muted: #a7afc2;
+      --success: #3ba55d;
+      --border: #262d3d;
+      --shadow: 0 20px 40px rgba(0, 0, 0, 0.35);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+    }
+
+    body {
+      background: radial-gradient(circle at top, rgba(88, 101, 242, 0.15), transparent 55%), var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 48px 20px 80px;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 36px;
+      animation: fadeIn 0.9s ease;
+    }
+
+    header h1 {
+      font-size: clamp(2.4rem, 3vw, 3.4rem);
+      letter-spacing: 0.5px;
+      margin-bottom: 12px;
+    }
+
+    header p {
+      color: var(--muted);
+      font-size: 1.05rem;
+    }
+
+    .form-wrapper {
+      width: min(880px, 100%);
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: clamp(24px, 4vw, 40px);
+      box-shadow: var(--shadow);
+      animation: slideUpFade 0.8s ease;
+    }
+
+    form {
+      display: grid;
+      gap: 18px;
+    }
+
+    .field-grid {
+      display: grid;
+      gap: 18px;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    }
+
+    label {
+      display: block;
+      font-size: 0.9rem;
+      margin-bottom: 8px;
+      color: var(--muted);
+    }
+
+    input,
+    textarea {
+      width: 100%;
+      padding: 12px 14px;
+      background: var(--panel-soft);
+      border: 1px solid transparent;
+      border-radius: 12px;
+      color: var(--text);
+      transition: border 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    input:focus,
+    textarea:focus {
+      outline: none;
+      border-color: rgba(88, 101, 242, 0.7);
+      box-shadow: 0 0 0 3px rgba(88, 101, 242, 0.2);
+    }
+
+    textarea {
+      min-height: 130px;
+      resize: vertical;
+    }
+
+    .submit-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    button {
+      border: none;
+      padding: 12px 30px;
+      border-radius: 999px;
+      background: var(--accent);
+      color: white;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+      background: var(--accent-hover);
+      box-shadow: 0 12px 24px rgba(88, 101, 242, 0.35);
+    }
+
+    button:active {
+      transform: translateY(0);
+    }
+
+    .success {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      background: rgba(59, 165, 93, 0.12);
+      border: 1px solid rgba(59, 165, 93, 0.4);
+      padding: 16px 18px;
+      border-radius: 14px;
+      opacity: 0;
+      transform: scale(0.95);
+      transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+
+    .success.show {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    .success .checkmark {
+      font-size: 1.4rem;
+      color: var(--success);
+      animation: pop 0.5s ease;
+    }
+
+    .success p {
+      color: var(--text);
+    }
+
+    .success span {
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .reports-section {
+      width: min(1000px, 100%);
+      margin-top: 60px;
+    }
+
+    .reports-section h2 {
+      font-size: 1.8rem;
+      margin-bottom: 22px;
+    }
+
+    .reports-grid {
+      display: grid;
+      gap: 18px;
+    }
+
+    .report-card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 18px 20px;
+      box-shadow: var(--shadow);
+      transition: transform 0.2s ease, border 0.2s ease;
+    }
+
+    .report-card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(88, 101, 242, 0.6);
+    }
+
+    .report-card.new {
+      animation: slideUp 0.5s ease;
+    }
+
+    .report-card h3 {
+      font-size: 1.05rem;
+      margin-bottom: 8px;
+    }
+
+    .report-meta {
+      color: var(--muted);
+      font-size: 0.9rem;
+      margin-bottom: 10px;
+    }
+
+    .report-reason {
+      color: var(--text);
+      line-height: 1.5;
+    }
+
+    .empty-state {
+      color: var(--muted);
+      font-size: 1rem;
+      padding: 20px;
+      border: 1px dashed var(--border);
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes slideUpFade {
+      from { opacity: 0; transform: translateY(18px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes pop {
+      0% { transform: scale(0.6); }
+      60% { transform: scale(1.2); }
+      100% { transform: scale(1); }
+    }
+
+    @media (max-width: 700px) {
+      body {
+        padding: 32px 16px 64px;
+      }
+
+      .submit-row {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      button {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Nerimity Reports</h1>
+    <p>Report inappropriate behavior in Nerimity</p>
+  </header>
+
+  <section class="form-wrapper">
+    <form id="reportForm" novalidate>
+      <div class="field-grid">
+        <div>
+          <label for="reporterName">Your Username</label>
+          <input id="reporterName" name="reporterName" type="text" placeholder="Your username" required />
+        </div>
+        <div>
+          <label for="reporterTag">Your Tag</label>
+          <input id="reporterTag" name="reporterTag" type="text" placeholder="#1234" required />
+        </div>
+        <div>
+          <label for="reportedName">Reported User's Username</label>
+          <input id="reportedName" name="reportedName" type="text" placeholder="Reported username" required />
+        </div>
+        <div>
+          <label for="reportedTag">Reported User's Tag</label>
+          <input id="reportedTag" name="reportedTag" type="text" placeholder="#0000" required />
+        </div>
+      </div>
+      <div>
+        <label for="reason">Report Reason</label>
+        <textarea id="reason" name="reason" placeholder="Describe what happened" required></textarea>
+      </div>
+      <div class="submit-row">
+        <button type="submit">Report</button>
+        <div class="success" id="successMessage" aria-live="polite">
+          <div class="checkmark">✔</div>
+          <p>Report submitted successfully. It will be reviewed.</p>
+          <span>For further details, you can contact Nerimity moderators directly through the Nerimity application.</span>
+        </div>
+      </div>
+    </form>
+  </section>
+
+  <section class="reports-section" id="reportsSection">
+    <h2>Recent Reports</h2>
+    <div class="reports-grid" id="reportsGrid">
+      <div class="empty-state" id="emptyState">No reports yet. Submitted reports will appear here.</div>
+    </div>
+  </section>
+
+  <script>
+    const form = document.getElementById("reportForm");
+    const successMessage = document.getElementById("successMessage");
+    const reportsGrid = document.getElementById("reportsGrid");
+    const emptyState = document.getElementById("emptyState");
+
+    const STORAGE_KEY = "nerimityReports";
+
+    const loadReports = () => {
+      try {
+        return JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+      } catch (error) {
+        return [];
+      }
+    };
+
+    const saveReports = (reports) => {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(reports));
+    };
+
+    const formatDate = (date) => {
+      return new Intl.DateTimeFormat("en-US", {
+        dateStyle: "medium",
+        timeStyle: "short",
+      }).format(date);
+    };
+
+    const createReportCard = (report, isNew = false) => {
+      const card = document.createElement("div");
+      card.className = `report-card${isNew ? " new" : ""}`;
+      card.innerHTML = `
+        <h3>Reported by: ${report.reporterName} ${report.reporterTag}</h3>
+        <div class="report-meta">Reported user: ${report.reportedName} ${report.reportedTag}</div>
+        <div class="report-meta">${report.date}</div>
+        <p class="report-reason">${report.reason}</p>
+      `;
+      return card;
+    };
+
+    const renderReports = () => {
+      const reports = loadReports();
+      reportsGrid.innerHTML = "";
+      if (reports.length === 0) {
+        reportsGrid.appendChild(emptyState);
+        return;
+      }
+      reports.forEach((report) => {
+        reportsGrid.appendChild(createReportCard(report));
+      });
+    };
+
+    const showSuccess = () => {
+      successMessage.classList.add("show");
+      setTimeout(() => {
+        successMessage.classList.remove("show");
+      }, 4500);
+    };
+
+    form.addEventListener("submit", (event) => {
+      event.preventDefault();
+
+      const formData = new FormData(form);
+      const report = {
+        reporterName: formData.get("reporterName").trim(),
+        reporterTag: formData.get("reporterTag").trim(),
+        reportedName: formData.get("reportedName").trim(),
+        reportedTag: formData.get("reportedTag").trim(),
+        reason: formData.get("reason").trim(),
+        date: formatDate(new Date()),
+      };
+
+      const hasEmptyField = Object.values(report).some((value) => value === "");
+      if (hasEmptyField) {
+        alert("Please fill in all fields before submitting the report.");
+        return;
+      }
+
+      const reports = loadReports();
+      reports.unshift(report);
+      saveReports(reports);
+
+      if (reports.length === 1) {
+        reportsGrid.innerHTML = "";
+      }
+
+      reportsGrid.prepend(createReportCard(report, true));
+      form.reset();
+      showSuccess();
+    });
+
+    renderReports();
+  </script>
+</body>
+</html>
